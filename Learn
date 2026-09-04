@@ -1,0 +1,2 @@
+- clientWidth/Height (excluding borders and scrollbars)
+- offsetWidth/Height (including borders)
