@@ -128,7 +128,8 @@ function generateEmoji(name, count) {
 function startGame() {
     game.textContent = '';
     things = [];
-
+diamondCount = 0
+giftCount = 0
     generateEmoji('wall', 100);
     generateEmoji('diamond', 50);
     generateEmoji('door', 1);
