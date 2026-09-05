@@ -51,6 +51,8 @@
     justify-content: space-between;
     align-items: center;
     border: 1px solid #000;
+    position: sticky;
+    left: 5px;
 }
 .move-btns {
     /* border: 1px solid #000; */
