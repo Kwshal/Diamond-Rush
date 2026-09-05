@@ -1,2 +1,6 @@
 - clientWidth/Height (excluding borders and scrollbars)
 - offsetWidth/Height (including borders)
+
+document.querySelector(`.diamond[style*="left: ${coord.x}px; top: ${coord.y}px"]`);
+arr.find;
+arr.findIndex;

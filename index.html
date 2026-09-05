@@ -1,25 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <title>Diamond Rush</title>
      <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
      <div class="game-container">
-         <div class="game">
-               <span class="player">🧍</span>
-         </div>
+          <div class="info">
+               <span id="diamond-count">💎 0/50</span>
+          </div>
+          <div class="game-wrapper">
+               <div class="game">
+                    <span class="player">🧍</span>
+               </div>
+          </div>
+     </div>
+
      <div class="btn-container">
           <!-- <button type="button">Start</button> -->
+          <button type="button" class="move-btn hide" id="top-left"></button>
           <button type="button" class="move-btn" id="up">↑</button>
-          <button type="button" class="move-btn" id="right">→</button>
+          <button type="button" class="move-btn hide" id="top-right"></button>
           <button type="button" class="move-btn" id="left">←</button>
+          <button type="button" class="move-btn" id="special"></button>
+          <button type="button" class="move-btn" id="right">→</button>
+          <button type="button" class="move-btn hide" id="bottom-left"></button>
           <button type="button" class="move-btn" id="down">↓</button>
-     </div>
+          <button type="button" class="move-btn hide" id="bottom-right"></button>
+
      </div>
 
      <script src="script.js"></script>
+     <script src="control.js"></script>
 </body>
+
 </html>
