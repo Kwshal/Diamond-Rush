@@ -10,29 +10,32 @@
 
 <body>
      <div class="game-container">
-          <div class="info">
-               <span id="diamond-count">💎 0/50</span>
-          </div>
           <div class="game-wrapper">
                <div class="game">
                     <span class="player">🧍</span>
                </div>
           </div>
-     </div>
-
      <div class="btn-container">
-          <!-- <button type="button">Start</button> -->
-          <button type="button" class="move-btn hide" id="top-left"></button>
-          <button type="button" class="move-btn" id="up">↑</button>
-          <button type="button" class="move-btn hide" id="top-right"></button>
-          <button type="button" class="move-btn" id="left">←</button>
-          <button type="button" class="move-btn" id="special"></button>
-          <button type="button" class="move-btn" id="right">→</button>
-          <button type="button" class="move-btn hide" id="bottom-left"></button>
-          <button type="button" class="move-btn" id="down">↓</button>
-          <button type="button" class="move-btn hide" id="bottom-right"></button>
-
+          <div class="move-btns">
+               <button type="button" class="move btn hide" id="top-left"></button>
+               <button type="button" class="move btn" id="up">↑</button>
+               <button type="button" class="move btn hide" id="top-right"></button>
+               <button type="button" class="move btn" id="left">←</button>
+               <button type="button" class="move btn" id="special"></button>
+               <button type="button" class="move btn" id="right">→</button>
+               <button type="button" class="move btn hide" id="bottom-left"></button>
+               <button type="button" class="move btn" id="down">↓</button>
+               <button type="button" class="move btn hide" id="bottom-right"></button>
+          </div>
+          <div class="info">
+               <p id="game-status">Collect all diamonds and gifts to open the door!</p>
+               <span id="diamond-count">💎 0/50</span>
+               <span id="gift-count">🎁 0/5</span>
+          <button type="button" class="btn" id="start" onclick="startGame()">Start</button>
+          </div>
      </div>
+     </div>
+
 
      <script src="script.js"></script>
      <script src="control.js"></script>

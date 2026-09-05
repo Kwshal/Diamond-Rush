@@ -1,26 +1,31 @@
-const player = document.querySelector('.player');
+let player = null;
 const game = document.querySelector('.game');
-const moveBtns = document.querySelectorAll('.move-btn');
+const moveBtns = document.querySelectorAll('.move');
 
 const emojiList = {
     wall: '🟫',
     diamond: '💎',
     door: '🚪',
-    box: '🎁'
+    gift: '🎁',
+    player: '🧍',
+    dinosaur: '🦖',
+    
 }
 
-let playerX = player.offsetLeft;
-let playerY = player.offsetTop;
+let playerX = null;
+let playerY = null;
 
 const diamondCountEl = document.getElementById('diamond-count')
+const giftCountEl = document.getElementById('gift-count')
 let diamondCount = 0;
+let giftCount = 0;
 
 const step = 25;
 
-const maxX = game.clientWidth - player.offsetWidth;
-const maxY = game.clientHeight - player.offsetHeight;
+const maxX = game.clientWidth - 25;
+const maxY = game.clientHeight - 25;
 
-const things = []
+let things = []
 
 moveBtns.forEach(btn => btn.addEventListener('click', handleMovement));
 
@@ -72,8 +77,23 @@ function handleThing(thing, thingIndex) {
     if (thing && thing.name === 'diamond') {
         const thingElement = document.querySelector(`.diamond[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
         thingElement.style.opacity = '0';
-        diamondCountEl.textContent = `${50 - diamondCount}/50`;
-        diamondCount++;
+        diamondCountEl.textContent = `💎 ${++diamondCount}/50`;
+        things.splice(thingIndex, 1);
+    } else if (thing && thing.name === 'door') {
+        // Open door when all diamonds are collected
+        if (diamondCount >= 50 && giftCount >= 5) {
+            const thingElement = document.querySelector(`.door[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
+            thingElement.style.opacity = '0';
+            things.splice(thingIndex, 1);
+            document.getElementById('game-status').textContent = 'Congratulations! You won!';
+        }
+    } else if (thing && thing.name === 'gift') {
+        const thingElement = document.querySelector(`.gift[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
+        thingElement.style.filter = 'opacity(0.3) hue-rotate(120deg)';
+        setTimeout(() => {
+            thingElement.textContent = '💎'
+        }, 300);
+        giftCountEl.textContent = `🎁 ${++giftCount}/5`;
         things.splice(thingIndex, 1);
     }
 }
@@ -97,13 +117,35 @@ function generateEmoji(name, count) {
             continue;
         }
         things.push({ x, y, name });
+        if (name === 'player') {
+            player = thing;
+            playerX = player.offsetLeft;
+            playerY = player.offsetTop;
+        }
     }
 }
 
-generateEmoji('wall', 100);
-generateEmoji('diamond', 50);
-generateEmoji('door', 1);
-generateEmoji('box', 5);
+function startGame() {
+    game.textContent = '';
+    things = [];
+
+    generateEmoji('wall', 100);
+    generateEmoji('diamond', 50);
+    generateEmoji('door', 1);
+    generateEmoji('gift', 5);
+    generateEmoji('player', 1);
+    generateEmoji('dinosaur', 5);
+
+    let startBtn = document.getElementById('start');
+    if (startBtn.textContent === 'Start') {
+        startBtn.textContent = 'Restart';
+    } else {
+        startBtn.textContent = 'Start';
+    }
+}
+startGame();
+
+
 
 
 
