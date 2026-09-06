@@ -1,5 +1,10 @@
 let player = null;
 const game = document.querySelector('.game');
+const gameStatus = document.getElementById('game-status');
+const startGameBtn = document.getElementById('start');
+const specialBtn = document.getElementById('special');
+const dimensionBtns = document.querySelectorAll('.dimension');
+
 const moveBtns = document.querySelectorAll('.move');
 
 const emojiList = {
@@ -10,8 +15,9 @@ const emojiList = {
     player: '🧍',
     dinosaur: '🦖',
     fire: '🔥',
-    
-
+    map: '🗺️',
+    apple: '🍎',
+    skull: '💀',
 }
 
 let playerX = null;
@@ -21,6 +27,8 @@ const diamondCountEl = document.getElementById('diamond-count')
 const giftCountEl = document.getElementById('gift-count')
 let diamondCount = 0;
 let giftCount = 0;
+let superMove = 1;
+let hammerActive = false;
 
 const step = 25;
 
@@ -30,8 +38,17 @@ const maxY = game.clientHeight - 25;
 let things = []
 
 moveBtns.forEach(btn => btn.addEventListener('click', handleMovement));
+specialBtn.addEventListener('click', () => {
+    hammerActive = !hammerActive;
+    if (hammerActive) {
+        specialBtn.style.transform = 'scale(0.95) translateX(0)';
+    } else {
+        specialBtn.style.transform = 'scale(1) translateX(0)';
+    }
+});
 
 function handleMovement() {
+
     const direction = this.id;
     let newX = playerX;
     let newY = playerY;
@@ -73,12 +90,13 @@ function handleMovement() {
     player.style.top = playerY + 'px';
 
     handleThing(thingAtNewPos, thingIndex);
-    console.log('Player moved to:', playerX, playerY);
+    // console.log('Player moved to:', playerX, playerY);
 }
 
 function handleThing(thing, thingIndex) {
     if (thing && thing.name === 'diamond') {
         const thingElement = document.querySelector(`.diamond[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
+        thingElement.style.translate = '0 -5px';
         thingElement.style.opacity = '0';
         diamondCountEl.textContent = `💎 ${++diamondCount}/50`;
         things.splice(thingIndex, 1);
@@ -86,26 +104,66 @@ function handleThing(thing, thingIndex) {
         // Open door when all diamonds are collected
         if (diamondCount >= 50 && giftCount >= 5) {
             const thingElement = document.querySelector(`.door[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
-            thingElement.style.opacity = '0';
+            thingElement.style.opacity = '0.5';
             things.splice(thingIndex, 1);
-            document.getElementById('game-status').textContent = 'Congratulations! You won!';
+            gameStatus.textContent = 'Congratulations! You won!';
+            gameStatus.style.display = 'block';
+            game.classList.add('won-blur');
         }
     } else if (thing && thing.name === 'gift') {
         const thingElement = document.querySelector(`.gift[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
         thingElement.style.filter = 'opacity(0.3) hue-rotate(120deg)';
+        thingElement.textContent = '';
+        const collectedElement = document.createElement('div');
+        if (thingElement.classList.contains('hammer')) {
+            collectedElement.classList.add('collected', 'hammer-collected');
+            specialBtn.textContent = '🔨';
+        } else if (thingElement.classList.contains('dimensions')) {
+            collectedElement.classList.add('collected', 'dimension-collected');
+            dimensionBtns.forEach(btn => {
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'all';
+            });
+            console.log('Dimension button enabled');
+        } else {
+            collectedElement.classList.add('collected', 'gift-collected');
+        }
+        thingElement.appendChild(collectedElement);
         setTimeout(() => {
-            thingElement.textContent = '💎'
-        }, 300);
+            thingElement.removeChild(collectedElement);
+            thingElement.style.display = 'none';
+        }, 1000);
         giftCountEl.textContent = `🎁 ${++giftCount}/5`;
         things.splice(thingIndex, 1);
-    }
-    if (thing && thing.name === 'fire') {
+    } else if (thing && thing.name === 'fire') {
         // Handle fire collision
-        console.log('Fire collision detected');
+        // console.log('Fire collision detected');
         player.style.opacity = '0';
+        game.style.saturate = '0'
         document.querySelector('.move-btns').style.pointerEvents = 'none';
-        document.getElementById('game-status').textContent = 'Game Over! You hit a fire!';
+        gameStatus.textContent = 'You were burned by Dino!';
+        setTimeout(() => {
+            player.textContent = '💀';
+        }, 300);
+        setTimeout(() => {
+            gameStatus.style.display = 'block';
+            game.classList.add('won-blur');
+        }, 1400);
+    } else if (thing && thing.name === 'map') {
+        const thingElement = document.querySelector(`.map[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
+        thingElement.style.opacity = '0';
+        generateEmoji('gift', 7);
+        things.splice(thingIndex, 1);
+        gameStatus.textContent = 'You found a map!';
+        gameStatus.style.display = 'block';
+        game.classList.add('won-blur');
+        setTimeout(() => {
+            gameStatus.style.display = 'none';
+            game.classList.remove('won-blur');
+            thingElement.style.display = 'none';
+        }, 1400);
     }
+
 }
 
 function generateEmoji(name, count) {
@@ -131,7 +189,7 @@ function generateEmoji(name, count) {
             player = thing;
             playerX = player.offsetLeft;
             playerY = player.offsetTop;
-        } 
+        }
         if (name === 'dinosaur') {
             // Add dinosaur movement logic here
             const fire = document.createElement('div');
@@ -141,8 +199,13 @@ function generateEmoji(name, count) {
             fire.style.top = y + 'px';
             game.appendChild(fire);
             const fireX = x - 25
-            things.push({ x:fireX, y, name: 'fire' })
-            console.log('Fire added at:', fireX, y);
+            things.push({ x: fireX, y, name: 'fire' })
+            // console.log('Fire added at:', fireX, y);
+        }
+        if (name === 'gift' && i === 0) {
+            thing.classList.add('hammer');
+        } else if (name === 'gift' && i === 1) {
+            thing.classList.add('dimensions');
         }
     }
 }
@@ -152,13 +215,25 @@ function startGame() {
     things = [];
     diamondCount = 0
     giftCount = 0
+    startGameBtn.textContent = 'Restart';
+    gameStatus.style.display = 'none';
+    game.classList.remove('won-blur');
     document.querySelector('.move-btns').style.pointerEvents = 'all'
+    dimensionBtns.forEach(btn => btn.style.opacity = '0');
+    diamondCountEl.style.pointerEvents = 'none';
+    diamondCountEl.textContent = `💎 ${diamondCount}/50`;
+    giftCountEl.textContent = `🎁 ${giftCount}/5`;
+
     generateEmoji('wall', 100);
     generateEmoji('diamond', 50);
     generateEmoji('door', 1);
-    generateEmoji('gift', 5);
+    generateEmoji('map', 1);
     generateEmoji('player', 1);
-    generateEmoji('dinosaur', 5);
+    generateEmoji('apple', 1);
+    generateEmoji('skull', 4);
+    generateEmoji('dinosaur', 7);
+
+        player.textContent = '🧍';
 
     let startBtn = document.getElementById('start');
     if (startBtn.textContent === 'Start') {
