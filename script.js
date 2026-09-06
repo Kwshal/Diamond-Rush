@@ -9,7 +9,9 @@ const emojiList = {
     gift: '🎁',
     player: '🧍',
     dinosaur: '🦖',
+    fire: '🔥',
     
+
 }
 
 let playerX = null;
@@ -71,6 +73,7 @@ function handleMovement() {
     player.style.top = playerY + 'px';
 
     handleThing(thingAtNewPos, thingIndex);
+    console.log('Player moved to:', playerX, playerY);
 }
 
 function handleThing(thing, thingIndex) {
@@ -95,6 +98,13 @@ function handleThing(thing, thingIndex) {
         }, 300);
         giftCountEl.textContent = `🎁 ${++giftCount}/5`;
         things.splice(thingIndex, 1);
+    }
+    if (thing && thing.name === 'fire') {
+        // Handle fire collision
+        console.log('Fire collision detected');
+        player.style.opacity = '0';
+        document.querySelector('.move-btns').style.pointerEvents = 'none';
+        document.getElementById('game-status').textContent = 'Game Over! You hit a fire!';
     }
 }
 
@@ -121,6 +131,18 @@ function generateEmoji(name, count) {
             player = thing;
             playerX = player.offsetLeft;
             playerY = player.offsetTop;
+        } 
+        if (name === 'dinosaur') {
+            // Add dinosaur movement logic here
+            const fire = document.createElement('div');
+            fire.classList.add('fire', 'emoji');
+            // fire.textContent = '🔥';
+            fire.style.left = x - 25 + 'px';
+            fire.style.top = y + 'px';
+            game.appendChild(fire);
+            const fireX = x - 25
+            things.push({ x:fireX, y, name: 'fire' })
+            console.log('Fire added at:', fireX, y);
         }
     }
 }
@@ -128,8 +150,9 @@ function generateEmoji(name, count) {
 function startGame() {
     game.textContent = '';
     things = [];
-diamondCount = 0
-giftCount = 0
+    diamondCount = 0
+    giftCount = 0
+    document.querySelector('.move-btns').style.pointerEvents = 'all'
     generateEmoji('wall', 100);
     generateEmoji('diamond', 50);
     generateEmoji('door', 1);
