@@ -221,6 +221,8 @@ function generateEmoji(name, count) {
 
 function startGame() {
     game.textContent = '';
+specialBtn.textContent = '';
+dimensionBtns.forEach(btn => btn.style.pointerEvents = 'none');
     things = [];
     diamondCount = 0
     giftCount = 0
