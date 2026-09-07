@@ -5,6 +5,10 @@ const startGameBtn = document.getElementById('start');
 const specialBtn = document.getElementById('special');
 const dimensionBtns = document.querySelectorAll('.dimension');
 
+const fireEl = document.getElementById('fire');
+const swordEl = document.getElementById('sword');
+const dimensionsEl = document.getElementById('dimensions');
+
 const moveBtns = document.querySelectorAll('.move');
 
 const emojiList = {
@@ -17,7 +21,8 @@ const emojiList = {
     fire: '🔥',
     map: '🗺️',
     apple: '🍎',
-    skull: '💀',
+    snail: '🐌',
+    
 }
 
 let playerX = null;
@@ -28,7 +33,8 @@ const giftCountEl = document.getElementById('gift-count')
 let diamondCount = 0;
 let giftCount = 0;
 let superMove = 1;
-let hammerActive = false;
+let fireResistant = false;
+let swordActive = false;
 
 const step = 25;
 
@@ -40,19 +46,19 @@ let things = []
 moveBtns.forEach(btn => btn.addEventListener('click', handleMovement));
 
 specialBtn.addEventListener('click', () => {
-    hammerActive = !hammerActive;
-    if (hammerActive) {
+    swordActive = !swordActive;
+    if (swordActive) {
         specialBtn.style.transform = 'scale(0.95) translateX(0)';
         moveBtns.forEach(btn => {
             btn.style.color = 'maroon';
         });
-        player.classList.add('hammer-active');
+        player.classList.add('sword-active');
     } else {
         specialBtn.style.transform = 'scale(1) translateX(0)';
         moveBtns.forEach(btn => {
             btn.style.color = '';
         });
-        player.classList.remove('hammer-active');
+        player.classList.remove('sword-active');
     }
 });
 
@@ -99,6 +105,13 @@ function handleMovement() {
     player.style.top = playerY + 'px';
 
     handleThing(thingAtNewPos, thingIndex);
+    specialBtn.style.transform = 'scale(1) translateX(0)';
+    moveBtns.forEach(btn => {
+        btn.style.color = '';
+    });
+    player.classList.remove('sword-active');
+    game.style.saturate = '1';
+    swordActive = false;
     // console.log('Player moved to:', playerX, playerY);
 }
 
@@ -107,7 +120,7 @@ function handleThing(thing, thingIndex) {
         const thingElement = document.querySelector(`.diamond[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
         thingElement.style.translate = '0 -5px';
         thingElement.style.opacity = '0';
-        diamondCountEl.textContent = `💎 ${++diamondCount}/50`;
+        diamondCountEl.textContent = `💎 ${++diamondCount}/40`;
         things.splice(thingIndex, 1);
     } else if (thing && thing.name === 'door') {
         // Open door when all diamonds are collected
@@ -124,33 +137,49 @@ function handleThing(thing, thingIndex) {
         thingElement.style.filter = 'opacity(0.3) hue-rotate(120deg)';
         thingElement.textContent = '';
         const collectedElement = document.createElement('div');
-        if (thingElement.classList.contains('hammer')) {
-            collectedElement.classList.add('collected', 'hammer-collected');
-            specialBtn.textContent = '🔨';
-        } else if (thingElement.classList.contains('dimensions')) {
+
+        if (thingElement.classList.contains('sword')) {
+            collectedElement.classList.add('collected', 'sword-collected');
+            specialBtn.textContent = '🗡️';
+            specialBtn.style.pointerEvents = 'all';
+            swordEl.style.opacity = '1';
+        } 
+        else if (thingElement.classList.contains('dimensions')) {
             collectedElement.classList.add('collected', 'dimension-collected');
             dimensionBtns.forEach(btn => {
                 btn.style.opacity = '1';
                 btn.style.pointerEvents = 'all';
             });
+            dimensionsEl.style.opacity = '1';
             console.log('Dimension button enabled');
-        } else {
+        }
+        else if (thingElement.classList.contains('fire')) {
+            collectedElement.classList.add('collected', 'fire-collected');
+            fireEl.style.opacity = '1';
+            fireResistant = true;
+            player.style.boxShadow = '0 0 10px #ffffff';
+
+        }
+        else {
             collectedElement.classList.add('collected', 'gift-collected');
         }
+
         thingElement.appendChild(collectedElement);
         setTimeout(() => {
             thingElement.removeChild(collectedElement);
             thingElement.style.display = 'none';
         }, 1000);
+
         giftCountEl.textContent = `🎁 ${++giftCount}/5`;
         things.splice(thingIndex, 1);
-    } else if (thing && thing.name === 'fire') {
+
+    } else if (thing && thing.name === 'fire' && !fireResistant) {
         // Handle fire collision
         // console.log('Fire collision detected');
         player.style.opacity = '0';
         game.style.saturate = '0'
         document.querySelector('.move-btns').style.pointerEvents = 'none';
-        gameStatus.textContent = 'You were burned by Dino!';
+        gameStatus.textContent = 'Dino 🦖 burned you! 🔥';
         setTimeout(() => {
             player.textContent = '💀';
         }, 300);
@@ -163,7 +192,7 @@ function handleThing(thing, thingIndex) {
         thingElement.style.opacity = '0';
         generateEmoji('gift', 7);
         things.splice(thingIndex, 1);
-        gameStatus.textContent = 'You found a map!';
+        gameStatus.textContent = 'You found a map! 🗺️';
         gameStatus.style.display = 'block';
         game.classList.add('won-blur');
         setTimeout(() => {
@@ -171,6 +200,34 @@ function handleThing(thing, thingIndex) {
             game.classList.remove('won-blur');
             thingElement.style.display = 'none';
         }, 1400);
+    } else if (thing && thing.name === 'dinosaur') {
+        if (swordActive) {
+            const dino = document.querySelector(`.dinosaur[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
+            const fire = document.querySelector(`.fire[style*="left: ${thing.x - 25}px; top: ${thing.y}px"]`);
+            dino.style.animation = 'none';
+            dino.style.opacity = '0.5';
+            dino.style.scale = '1.5';
+            setTime = setTimeout(() => {
+                dino.style.scale = '1';
+                dino.textContent = '💀';
+            }, 300);
+            fire.style.opacity = '0';
+            things.splice(thingIndex, 2); // Remove both dinosaur and fire
+            // console.log('Dinosaur defeated at:', newX, newY);
+            return;
+        }
+        player.style.opacity = '0';
+        game.style.saturate = '0'
+        document.querySelector('.move-btns').style.pointerEvents = 'none';
+        gameStatus.textContent = 'You were eaten by Dino! 🦖';
+        setTimeout(() => {
+            player.textContent = '💀';
+        }, 300);
+        setTimeout(() => {
+            gameStatus.style.display = 'block';
+            game.classList.add('won-blur');
+        }, 1400);
+
     }
 
 }
@@ -212,17 +269,20 @@ function generateEmoji(name, count) {
             // console.log('Fire added at:', fireX, y);
         }
         if (name === 'gift' && i === 0) {
-            thing.classList.add('hammer');
+            thing.classList.add('sword');
         } else if (name === 'gift' && i === 1) {
             thing.classList.add('dimensions');
+        } else if (name === 'gift' && i === 2) {
+            thing.classList.add('fire');
         }
     }
 }
 
 function startGame() {
     game.textContent = '';
-specialBtn.textContent = '';
-dimensionBtns.forEach(btn => btn.style.pointerEvents = 'none');
+    specialBtn.textContent = '';
+    specialBtn.style.pointerEvents = 'none';
+    dimensionBtns.forEach(btn => btn.style.pointerEvents = 'none');
     things = [];
     diamondCount = 0
     giftCount = 0
@@ -240,18 +300,13 @@ dimensionBtns.forEach(btn => btn.style.pointerEvents = 'none');
     generateEmoji('door', 1);
     generateEmoji('map', 1);
     generateEmoji('player', 1);
-    generateEmoji('apple', 1);
-    generateEmoji('skull', 4);
+    // generateEmoji('apple', 1);
+    // generateEmoji('snail', 4);
     generateEmoji('dinosaur', 7);
 
-        player.textContent = '🧍';
+    player.textContent = '🧍';
 
-    let startBtn = document.getElementById('start');
-    if (startBtn.textContent === 'Start') {
-        startBtn.textContent = 'Restart';
-    } else {
-        startBtn.textContent = 'Start';
-    }
+    startGameBtn.textContent = 'Restart';
 }
 startGame();
 
