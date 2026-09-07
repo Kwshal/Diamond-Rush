@@ -38,12 +38,21 @@ const maxY = game.clientHeight - 25;
 let things = []
 
 moveBtns.forEach(btn => btn.addEventListener('click', handleMovement));
+
 specialBtn.addEventListener('click', () => {
     hammerActive = !hammerActive;
     if (hammerActive) {
         specialBtn.style.transform = 'scale(0.95) translateX(0)';
+        moveBtns.forEach(btn => {
+            btn.style.color = 'maroon';
+        });
+        player.classList.add('hammer-active');
     } else {
         specialBtn.style.transform = 'scale(1) translateX(0)';
+        moveBtns.forEach(btn => {
+            btn.style.color = '';
+        });
+        player.classList.remove('hammer-active');
     }
 });
 
@@ -102,7 +111,7 @@ function handleThing(thing, thingIndex) {
         things.splice(thingIndex, 1);
     } else if (thing && thing.name === 'door') {
         // Open door when all diamonds are collected
-        if (diamondCount >= 50 && giftCount >= 5) {
+        if (diamondCount >= 40 && giftCount >= 5) {
             const thingElement = document.querySelector(`.door[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
             thingElement.style.opacity = '0.5';
             things.splice(thingIndex, 1);
@@ -221,7 +230,7 @@ function startGame() {
     document.querySelector('.move-btns').style.pointerEvents = 'all'
     dimensionBtns.forEach(btn => btn.style.opacity = '0');
     diamondCountEl.style.pointerEvents = 'none';
-    diamondCountEl.textContent = `💎 ${diamondCount}/50`;
+    diamondCountEl.textContent = `💎 ${diamondCount}/40`;
     giftCountEl.textContent = `🎁 ${giftCount}/5`;
 
     generateEmoji('wall', 100);
