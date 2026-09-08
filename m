@@ -34,3 +34,4 @@ v0.0.5
 - better player movements
 - feedback window
 - hold btns to keep moving
+- ghost

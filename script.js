@@ -1,6 +1,7 @@
 let player = null;
 const game = document.querySelector('.game');
 const gameStatus = document.getElementById('game-status');
+const gameStatusContainer = document.getElementById('game-status-container');
 const startGameBtn = document.getElementById('start');
 const specialBtn = document.getElementById('special');
 const dimensionBtns = document.querySelectorAll('.dimension');
@@ -38,33 +39,72 @@ let swordActive = false;
 
 const step = 25;
 
-const maxX = game.clientWidth - 25;
-const maxY = game.clientHeight - 25;
+const maxX = 475;
+const maxY = 475;
 
 let things = []
 
-moveBtns.forEach(btn => btn.addEventListener('click', handleMovement));
+let moveInterval = null;
+
+moveBtns.forEach(btn => {
+    btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+
+        handleMovement(e);
+
+        moveInterval = setInterval(() => {
+            handleMovement(e);
+        }, 300);
+    });
+
+    btn.addEventListener('pointerup', stopMovement);
+    btn.addEventListener('pointercancel', stopMovement);
+    btn.addEventListener('pointerleave', stopMovement);
+});
+function stopMovement() {
+    clearInterval(moveInterval);
+    moveInterval = null;
+}
 
 specialBtn.addEventListener('click', () => {
     swordActive = !swordActive;
     if (swordActive) {
         specialBtn.style.transform = 'scale(0.95) translateX(0)';
         moveBtns.forEach(btn => {
-            btn.style.color = 'maroon';
+            btn.style.color = 'red';
         });
         player.classList.add('sword-active');
     } else {
         specialBtn.style.transform = 'scale(1) translateX(0)';
         moveBtns.forEach(btn => {
-            btn.style.color = '';
+            btn.style.color = 'black';
         });
         player.classList.remove('sword-active');
     }
 });
 
-function handleMovement() {
+window.addEventListener('resize', () => {
+    viewportWidth = game.parentElement.clientWidth;
+    viewportHeight = game.parentElement.clientHeight;
+    updateCamera();
+});
+let viewportWidth = game.parentElement.clientWidth;
+let viewportHeight = game.parentElement.clientHeight;
+function updateCamera() {
 
-    const direction = this.id;
+    let cameraX = playerX + 12.5 - viewportWidth / 2;
+    let cameraY = playerY + 12.5 - viewportHeight / 2;
+
+    // Don't let the camera see outside the 500x500 world
+    cameraX = Math.max(0, Math.min(cameraX, maxX - viewportWidth));
+    cameraY = Math.max(0, Math.min(cameraY, maxY - viewportHeight));
+
+    game.style.transform = `translate(${-cameraX}px, ${-cameraY}px)`;
+}
+
+function handleMovement(e) {
+    const btn = e.target;
+    const direction = btn.id;
     let newX = playerX;
     let newY = playerY;
 
@@ -103,22 +143,22 @@ function handleMovement() {
     playerY = newY;
     player.style.left = playerX + 'px';
     player.style.top = playerY + 'px';
+    
+    updateCamera();
 
     handleThing(thingAtNewPos, thingIndex);
     specialBtn.style.transform = 'scale(1) translateX(0)';
     moveBtns.forEach(btn => {
-        btn.style.color = '';
+        btn.style.color = '#000';
     });
     player.classList.remove('sword-active');
     game.style.saturate = '1';
     swordActive = false;
     // console.log('Player moved to:', playerX, playerY);
 }
-
 function handleThing(thing, thingIndex) {
     if (thing && thing.name === 'diamond') {
         const thingElement = document.querySelector(`.diamond[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
-        thingElement.style.translate = '0 -5px';
         thingElement.style.opacity = '0';
         diamondCountEl.textContent = `💎 ${++diamondCount}/40`;
         things.splice(thingIndex, 1);
@@ -129,7 +169,7 @@ function handleThing(thing, thingIndex) {
             thingElement.style.opacity = '0.5';
             things.splice(thingIndex, 1);
             gameStatus.textContent = 'Congratulations! You won!';
-            gameStatus.style.display = 'block';
+            gameStatusContainer.style.display = 'flex';
             game.classList.add('won-blur');
         }
     } else if (thing && thing.name === 'gift') {
@@ -142,7 +182,8 @@ function handleThing(thing, thingIndex) {
             collectedElement.classList.add('collected', 'sword-collected');
             specialBtn.textContent = '🗡️';
             specialBtn.style.pointerEvents = 'all';
-            swordEl.style.opacity = '1';
+            specialBtn.style.opacity = '1';
+            swordEl.style.filter = 'saturate(1) brightness(1)';
         } 
         else if (thingElement.classList.contains('dimensions')) {
             collectedElement.classList.add('collected', 'dimension-collected');
@@ -150,15 +191,14 @@ function handleThing(thing, thingIndex) {
                 btn.style.opacity = '1';
                 btn.style.pointerEvents = 'all';
             });
-            dimensionsEl.style.opacity = '1';
+            dimensionsEl.style.filter = 'saturate(1) brightness(1)';
             console.log('Dimension button enabled');
         }
         else if (thingElement.classList.contains('fire')) {
             collectedElement.classList.add('collected', 'fire-collected');
-            fireEl.style.opacity = '1';
+            fireEl.style.filter = 'saturate(1) brightness(1)';
             fireResistant = true;
             player.style.boxShadow = '0 0 10px #ffffff';
-
         }
         else {
             collectedElement.classList.add('collected', 'gift-collected');
@@ -174,17 +214,15 @@ function handleThing(thing, thingIndex) {
         things.splice(thingIndex, 1);
 
     } else if (thing && thing.name === 'fire' && !fireResistant) {
-        // Handle fire collision
-        // console.log('Fire collision detected');
         player.style.opacity = '0';
         game.style.saturate = '0'
         document.querySelector('.move-btns').style.pointerEvents = 'none';
         gameStatus.textContent = 'Dino 🦖 burned you! 🔥';
         setTimeout(() => {
             player.textContent = '💀';
-        }, 300);
+        }, 200);
         setTimeout(() => {
-            gameStatus.style.display = 'block';
+            gameStatusContainer.style.display = 'flex';
             game.classList.add('won-blur');
         }, 1400);
     } else if (thing && thing.name === 'map') {
@@ -193,10 +231,10 @@ function handleThing(thing, thingIndex) {
         generateEmoji('gift', 7);
         things.splice(thingIndex, 1);
         gameStatus.textContent = 'You found a map! 🗺️';
-        gameStatus.style.display = 'block';
+        gameStatusContainer.style.display = 'flex';
         game.classList.add('won-blur');
         setTimeout(() => {
-            gameStatus.style.display = 'none';
+            gameStatusContainer.style.display = 'none';
             game.classList.remove('won-blur');
             thingElement.style.display = 'none';
         }, 1400);
@@ -206,7 +244,7 @@ function handleThing(thing, thingIndex) {
             const fire = document.querySelector(`.fire[style*="left: ${thing.x - 25}px; top: ${thing.y}px"]`);
             dino.style.animation = 'none';
             dino.style.opacity = '0.5';
-            dino.style.scale = '1.5';
+            dino.style.scale = '1.2';
             setTime = setTimeout(() => {
                 dino.style.scale = '1';
                 dino.textContent = '💀';
@@ -224,7 +262,7 @@ function handleThing(thing, thingIndex) {
             player.textContent = '💀';
         }, 300);
         setTimeout(() => {
-            gameStatus.style.display = 'block';
+            gameStatusContainer.style.display = 'flex';
             game.classList.add('won-blur');
         }, 1400);
 
@@ -238,8 +276,8 @@ function generateEmoji(name, count) {
         thing.classList.add(name, 'emoji');
         thing.textContent = emojiList[name];
 
-        let x = Math.floor(Math.random() * ((game.clientWidth) / 25)) * 25;
-        let y = Math.floor(Math.random() * ((game.clientHeight) / 25)) * 25;
+        let x = Math.floor(Math.random() * ((maxX) / 25)) * 25;
+        let y = Math.floor(Math.random() * ((maxY) / 25)) * 25;
 
         const thingExists = things.find(thing => thing.x === x && thing.y === y);
         if (!thingExists) {
@@ -277,23 +315,29 @@ function generateEmoji(name, count) {
         }
     }
 }
-
 function startGame() {
     game.textContent = '';
     specialBtn.textContent = '';
     specialBtn.style.pointerEvents = 'none';
+    specialBtn.style.opacity = '0.2';
     dimensionBtns.forEach(btn => btn.style.pointerEvents = 'none');
     things = [];
     diamondCount = 0
     giftCount = 0
-    startGameBtn.textContent = 'Restart';
-    gameStatus.style.display = 'none';
+    startGameBtn.textContent = 'Restart ↻';
+    fireResistant = false;
+    swordActive = false;
+    gameStatusContainer.style.display = 'none';
     game.classList.remove('won-blur');
     document.querySelector('.move-btns').style.pointerEvents = 'all'
     dimensionBtns.forEach(btn => btn.style.opacity = '0');
     diamondCountEl.style.pointerEvents = 'none';
     diamondCountEl.textContent = `💎 ${diamondCount}/40`;
     giftCountEl.textContent = `🎁 ${giftCount}/5`;
+
+    fireEl.style.filter = 'saturate(0) brightness(0.8)';
+    swordEl.style.filter = 'saturate(0) brightness(0.8)';
+    dimensionsEl.style.filter = 'saturate(0) brightness(0.8)';
 
     generateEmoji('wall', 100);
     generateEmoji('diamond', 50);
@@ -306,9 +350,13 @@ function startGame() {
 
     player.textContent = '🧍';
 
-    startGameBtn.textContent = 'Restart';
+    startGameBtn.textContent = 'Restart ↻';
+    updateCamera();
 }
 startGame();
+
+
+
 
 
 

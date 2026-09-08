@@ -10,26 +10,29 @@
 
 <body>
      <div class="game-container">
-          <div class="game-wrapper">
-          <p id="game-status">Collect all diamonds and gifts to open the door!</p>
-
-               <div class="game">
-                    <span class="player">🧍</span>
-               </div>
-          </div>
-          <div class="btn-container">
-               <div class="info">
-                    <div class="counts-cont">
-                         <span id="diamond-count">💎 0/40</span>
-                         <span id="gift-count">🎁 0/5</span>
-                    </div>    
-                    <button type="button" class="btn" id="start" onclick="startGame()">Restart</button>
+          <div class="info">
+               <div class="counts-cont">
+                    <span class="count" id="diamond-count">💎 0/40</span>
+                    <span class="count" id="gift-count">🎁 0/5</span>
                </div>
                <div class="power-up-cont">
                     <span id="fire">🔥</span>
                     <span id="sword">🗡️</span>
                     <span id="dimensions">🌀</span>
                </div>
+
+               <button type="button" class="btn" id="start" onclick="startGame()">Restart ↻</button>
+          </div>
+
+          <div class="game-wrapper">
+               <span id="game-status-container">
+                    <p id="game-status">Collect all diamonds and gifts to open the door!</p>
+               </span>
+               <div class="game">
+                    <span class="player">🧍</span>
+               </div>
+          </div>
+          <div class="btn-container">
                <div class="move-btns">
                     <button type="button" class="move btn dimension" id="top-left">↑</button>
                     <button type="button" class="move btn" id="up">↑</button>
@@ -42,6 +45,7 @@
                     <button type="button" class="move btn dimension" id="bottom-right">↓</button>
                </div>
           </div>
+
      </div>
 
 
