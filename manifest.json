@@ -1,0 +1,18 @@
+{
+  "name": "Diamond Rush",
+  "short_name": "Diamond Rush",
+  "start_url": "./",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "icons/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
