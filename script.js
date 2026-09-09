@@ -22,25 +22,24 @@ const emojiList = {
     fire: '🔥',
     map: '🗺️',
     apple: '🍎',
-    snail: '🐌',
-    
+    fart: '💨',
 }
 
 let playerX = null;
 let playerY = null;
 
 const diamondCountEl = document.getElementById('diamond-count')
-const giftCountEl = document.getElementById('gift-count')
+const redDiamondCountEl = document.getElementById('red-diamond-count')
 let diamondCount = 0;
-let giftCount = 0;
+let redDiamondCount = 0;
 let superMove = 1;
 let fireResistant = false;
 let swordActive = false;
 
 const step = 25;
 
-const maxX = 475;
-const maxY = 475;
+const maxX = 500;
+const maxY = 500;
 
 let things = []
 
@@ -131,8 +130,8 @@ function handleMovement(e) {
     }
 
     // Keep player inside game
-    newX = Math.max(0, Math.min(newX, maxX));
-    newY = Math.max(0, Math.min(newY, maxY));
+    newX = Math.max(0, Math.min(newX, maxX - 25));
+    newY = Math.max(0, Math.min(newY, maxY - 25));
 
     let thingAtNewPos = things.find(thing => thing.x === newX && thing.y === newY);
     let thingIndex = things.findIndex(thing => thing.x === newX && thing.y === newY);
@@ -143,7 +142,7 @@ function handleMovement(e) {
     playerY = newY;
     player.style.left = playerX + 'px';
     player.style.top = playerY + 'px';
-    
+
     updateCamera();
 
     handleThing(thingAtNewPos, thingIndex);
@@ -152,9 +151,7 @@ function handleMovement(e) {
         btn.style.color = '#000';
     });
     player.classList.remove('sword-active');
-    game.style.saturate = '1';
     swordActive = false;
-    // console.log('Player moved to:', playerX, playerY);
 }
 function handleThing(thing, thingIndex) {
     if (thing && thing.name === 'diamond') {
@@ -164,11 +161,11 @@ function handleThing(thing, thingIndex) {
         things.splice(thingIndex, 1);
     } else if (thing && thing.name === 'door') {
         // Open door when all diamonds are collected
-        if (diamondCount >= 40 && giftCount >= 5) {
+        if (diamondCount >= 40 && redDiamondCount >= 5) {
             const thingElement = document.querySelector(`.door[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
             thingElement.style.opacity = '0.5';
             things.splice(thingIndex, 1);
-            gameStatus.textContent = 'Congratulations! You won!';
+            gameStatus.textContent = 'Alright, You win. I tried my best to kill ya.';
             gameStatusContainer.style.display = 'flex';
             game.classList.add('won-blur');
         }
@@ -184,7 +181,7 @@ function handleThing(thing, thingIndex) {
             specialBtn.style.pointerEvents = 'all';
             specialBtn.style.opacity = '1';
             swordEl.style.filter = 'saturate(1) brightness(1)';
-        } 
+        }
         else if (thingElement.classList.contains('dimensions')) {
             collectedElement.classList.add('collected', 'dimension-collected');
             dimensionBtns.forEach(btn => {
@@ -202,6 +199,7 @@ function handleThing(thing, thingIndex) {
         }
         else {
             collectedElement.classList.add('collected', 'gift-collected');
+            redDiamondCountEl.textContent = `💎 ${++redDiamondCount}/5`;
         }
 
         thingElement.appendChild(collectedElement);
@@ -210,7 +208,6 @@ function handleThing(thing, thingIndex) {
             thingElement.style.display = 'none';
         }, 1000);
 
-        giftCountEl.textContent = `🎁 ${++giftCount}/5`;
         things.splice(thingIndex, 1);
 
     } else if (thing && thing.name === 'fire' && !fireResistant) {
@@ -230,14 +227,14 @@ function handleThing(thing, thingIndex) {
         thingElement.style.opacity = '0';
         generateEmoji('gift', 7);
         things.splice(thingIndex, 1);
-        gameStatus.textContent = 'You found a map! 🗺️';
+        gameStatus.textContent = 'Looks like a map! 🗺️';
         gameStatusContainer.style.display = 'flex';
         game.classList.add('won-blur');
         setTimeout(() => {
             gameStatusContainer.style.display = 'none';
             game.classList.remove('won-blur');
             thingElement.style.display = 'none';
-        }, 1400);
+        }, 2400);
     } else if (thing && thing.name === 'dinosaur') {
         if (swordActive) {
             const dino = document.querySelector(`.dinosaur[style*="left: ${thing.x}px; top: ${thing.y}px"]`);
@@ -323,8 +320,8 @@ function startGame() {
     dimensionBtns.forEach(btn => btn.style.pointerEvents = 'none');
     things = [];
     diamondCount = 0
-    giftCount = 0
-    startGameBtn.textContent = 'Restart ↻';
+    redDiamondCount = 0
+    startGameBtn.textContent = '↻';
     fireResistant = false;
     swordActive = false;
     gameStatusContainer.style.display = 'none';
@@ -333,11 +330,11 @@ function startGame() {
     dimensionBtns.forEach(btn => btn.style.opacity = '0');
     diamondCountEl.style.pointerEvents = 'none';
     diamondCountEl.textContent = `💎 ${diamondCount}/40`;
-    giftCountEl.textContent = `🎁 ${giftCount}/5`;
+    redDiamondCountEl.textContent = `💎 ${redDiamondCount}/5`;
 
-    fireEl.style.filter = 'saturate(0) brightness(0.8)';
-    swordEl.style.filter = 'saturate(0) brightness(0.8)';
-    dimensionsEl.style.filter = 'saturate(0) brightness(0.8)';
+    fireEl.style.filter = 'saturate(0)';
+    swordEl.style.filter = 'saturate(0)';
+    dimensionsEl.style.filter = 'saturate(0)';
 
     generateEmoji('wall', 100);
     generateEmoji('diamond', 50);
@@ -350,15 +347,12 @@ function startGame() {
 
     player.textContent = '🧍';
 
-    startGameBtn.textContent = 'Restart ↻';
     updateCamera();
 }
 startGame();
 
-
-
-
-
-
-
-
+// helper functions
+function createdElement(name, x, y) {
+    const thingElement = document.querySelector(`.${name}[style*="left: ${x}px; top: ${y}px"]`);
+    // conditional lines
+}

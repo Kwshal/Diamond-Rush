@@ -6,6 +6,7 @@
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <title>Diamond Rush</title>
      <link rel="stylesheet" href="style.css">
+     <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
@@ -13,7 +14,7 @@
           <div class="info">
                <div class="counts-cont">
                     <span class="count" id="diamond-count">💎 0/40</span>
-                    <span class="count" id="gift-count">🎁 0/5</span>
+                    <span class="count" id="red-diamond-count">💎 0/40</span>
                </div>
                <div class="power-up-cont">
                     <span id="fire">🔥</span>
@@ -21,7 +22,7 @@
                     <span id="dimensions">🌀</span>
                </div>
 
-               <button type="button" class="btn" id="start" onclick="startGame()">Restart ↻</button>
+               <button type="button" class="btn" id="start" onclick="startGame()">↻</button>
           </div>
 
           <div class="game-wrapper">
@@ -33,6 +34,7 @@
                </div>
           </div>
           <div class="btn-container">
+               
                <div class="move-btns">
                     <button type="button" class="move btn dimension" id="top-left">↑</button>
                     <button type="button" class="move btn" id="up">↑</button>
@@ -50,7 +52,7 @@
 
 
      <script src="script.js"></script>
-     <script src="control.js"></script>
+     <script src="levels.js"></script>
 </body>
 
 </html>
