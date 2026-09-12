@@ -4,7 +4,7 @@
     box-sizing: border-box;
     user-select: none;
     text-align: center;
-    font-family: monospace;
+    font-family: Arial, Helvetica, sans-serif;
     color: #444;
 }
 .game-container {
@@ -178,15 +178,19 @@
 }
 .counts-cont {
     display: flex;
-    /* justify-content: space-around; */
-    align-items: center;
-    /* flex-direction: column; */
-    gap: 10px;
-    /* border: 1px solid #000; */
-    /* padding: 5px 10px; */
+    gap: 5px;
 }
 .count {
-    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 25px;
+    line-height: 0;
+    font-size: 15px;
+    padding: 5px 10px;
+    background-color: #ddd;
+    border-radius: 55px;
 }
 #d-count {
     filter: saturate(0);

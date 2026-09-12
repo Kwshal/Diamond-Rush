@@ -221,16 +221,19 @@ function movePlayer(btn) {
     // Keep player inside game
     if (newX < 0 || newX > 19 || newY < 0 || newY > 19) return;
 
+    player.textContent = '🏃';
+    clearTimeout(moveTimeout);
+    moveTimeout = setTimeout(() => {
+        player.textContent = '🧍';
+    }, 500);
+
     let thingAtNewPos = level[newY][newX];
+    if (thingAtNewPos === 'w') return;
 
     playerX = newX;
     playerY = newY;
     player.style.left = playerX * 25 + 'px';
     player.style.top = playerY * 25 + 'px';
-    player.textContent = '🏃';
-    moveTimeout = setTimeout(() => {
-        player.textContent = '🧍';
-    }, 300);
     updateCamera();
     handleThing(thingAtNewPos, newX, newY); // 'g', 5, 5
 
@@ -250,6 +253,10 @@ function handleThing(thing, x, y) {
         gameStatusContainer.style.display = 'flex';
         game.classList.add('blur');
         // TODO: WA me.
+        const encodedMessage = encodeURIComponent(`Ooga Booga! I won! 🎉`, '_blank');
+        setTimeout(() => {
+            window.open(`https://wa.me/919891835752?text=${encodedMessage}`);
+        }, 1000);
     } else if (thing === 'd' || thing === 'r' || thing === 'i' || thing === 'j' || thing === 's' || thing === 'm' || thing === 'a') {
         tile.textContent = '';
         const collectibleThing = document.createElement('div');
@@ -257,7 +264,7 @@ function handleThing(thing, x, y) {
         collectibleThing.textContent = collectibleList[thing];
         collectibleThing.classList.add('collect');
 
-        if (thing === 'd') diamondCountEl.textContent = `💎 ${++diamondCount}/50`;
+        if (thing === 'd') diamondCountEl.textContent = `💎${++diamondCount}/50`;
         else if (thing === 's') {
             attackBtn.textContent = '🗡️';
             attackBtn.style.pointerEvents = 'all';
@@ -285,7 +292,7 @@ function handleThing(thing, x, y) {
             }, 2500);
         } else if (thing === 'j') {
             jumpEl.style.display = 'flex';
-            gameStatus.textContent = 'Jump over the walls! 💠';
+            gameStatus.textContent = 'You can jump over the walls! 💠';
             setTimeout(() => {
                 gameStatusContainer.style.display = 'flex';
             }, 500);
@@ -293,7 +300,7 @@ function handleThing(thing, x, y) {
                 gameStatusContainer.style.display = 'none';
             }, 2500);
         } else if (thing === 'r') {
-            redDiamondCountEl.textContent = `💎 ${++redDiamondCount}/10`;
+            redDiamondCountEl.textContent = `💎${++redDiamondCount}/10`;
             tile.style.filter = 'hue-rotate(180deg)';
         } else if (thing === 'm') {
             setTimeout(() => {
@@ -346,26 +353,28 @@ function handleThing(thing, x, y) {
             }
             return;
         }
+        clearTimeout(moveTimeout);
+
         const msg = thing === 'f' ? 'Dino 🦖 burned you! 🔥' : 'You were eaten by Dino! 🦖';
         document.querySelector('.move-btns').style.pointerEvents = 'none';
         gameStatus.textContent = msg;
+
+        moveBtns.forEach(btn => {
+            btn.style.pointerEvents = 'none';
+        });
 
         const p = document.createElement('div');
         p.textContent = '💀';
         p.classList.add('dead');
 
-        clearTimeout(moveTimeout);
         setTimeout(() => {
             player.textContent = '';
             player.append(p);
         }, 200);
         setTimeout(() => {
-            p.remove();
-        }, 100);
-        setTimeout(() => {
             gameStatusContainer.style.display = 'flex';
             game.classList.add('blur');
-        }, 1400);
+        }, 1000);
     } else if (thing === 'C') {
         const heartEl = document.querySelector('.h');
 
@@ -407,24 +416,27 @@ function startGame() {
     swordActive = false;
     peach = false;
     jumpWall = false;
+    step = 1;
 
     game.textContent = '';
 
     gameStatusContainer.style.display = 'none';
     game.classList.remove('blur');
-    startGameBtn.textContent = 'Retry ↻';
+    startGameBtn.textContent = '↻';
     document.querySelector('.move-btns').style.pointerEvents = 'all';
     dimensionBtns.forEach(btn => btn.style.opacity = '0');
 
     diamondCountEl.textContent = `💎${diamondCount}/50`;
     redDiamondCountEl.textContent = `💎${redDiamondCount}/10`;
 
+    moveBtns.forEach(btn => btn.style.pointerEvents = 'all');
     attackBtn.textContent = '';
-    attackBtn.style.pointerEvents = 'none';
     attackBtn.style.opacity = '0';
+    attackBtn.style.pointerEvents = 'none';
     dimensionBtns.forEach(btn => btn.style.pointerEvents = 'none');
 
     jumpEl.style.display = 'none';
+    peachEl.style.display = 'none';
     level = structuredClone(levels[0])
     generateLevel(level)
     updateCamera();
