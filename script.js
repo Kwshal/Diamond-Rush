@@ -368,7 +368,7 @@ function handleThing(thing, x, y) {
         }
         clearTimeout(moveTimeout);
 
-        const msg = thing === 'f' ? 'You were burned 🔥 by Dino 🦖' : 'You were eaten 😋 by Dino! 🦖';
+        const msg = thing === 'f' ? 'You were burned by Dino! 🦖' : 'You were eaten by Dino! 🦖';
         document.querySelector('.move-btns').style.pointerEvents = 'none';
         gameStatus.textContent = msg;
 
@@ -465,6 +465,8 @@ function startGame() {
     swordActive = false;
     peach = false;
     jumpWall = false;
+    ghost = false;
+    hungry = true;
     step = 1;
 
     game.textContent = '';
@@ -485,6 +487,7 @@ function startGame() {
     dimensionBtns.forEach(btn => btn.style.pointerEvents = 'none');
 
     jumpEl.style.display = 'none';
+    peachEl.style.opacity = '1';
     peachEl.style.display = 'none';
     level = structuredClone(levels[0])
     generateLevel(level)
