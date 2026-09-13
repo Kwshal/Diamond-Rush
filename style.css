@@ -260,6 +260,11 @@
     position: absolute;
     font-size: 14px;
 }
+.w:nth-child(13n)::before {
+    content: "🦇";
+    position: absolute;
+    font-size: 14px;
+}
 
 .d {
     filter: saturate(0);
@@ -284,7 +289,7 @@
 }
 
 .o {
-    border: 1px solid #ffffff;
+    border: 4px solid #ffffff;
 }
 .map {
     box-shadow: 0 0 10px #ffffff;

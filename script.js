@@ -54,12 +54,12 @@ const levels = [
         ['w', '.', 'd', 'w', 'w', 'd', '.', 'w', '.', '.', 'w', '.', 'd', '.', 'w', 'd', '.', 'w', 'd', 'w'],
         ['.', 'd', 'w', 'd', 'w', 'w', '.', 'w', 'm', '.', '.', '.', 'w', '.', 'w', 'w', 'd', 'w', 'f', 'D'],
         ['.', 'w', 'w', 'r', '.', '.', '.', 'd', 'w', 'w', 'w', 'w', 'w', '.', 'd', 'w', 'r', 'w', 'd', 'w'],
-        ['.', '.', 'd', 'w', 'w', 'w', 'w', 'w', 'w', '.', 'd', '.', 'f', 'D', '.', 'w', 'w', '.', '.', 'w'],
-        ['w', 'w', 'P', 'w', 'w', '.', 'd', 's', 'w', 'd', 'r', 'd', '.', 'w', '.', '.', 'w', 'w', 'w', 'w'],
-        ['a', 'w', '.', '.', 'w', '.', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', '.', 'f', 'D', '.', 'r'],
+        ['.', '.', 'd', 'w', 'w', 'w', 'w', 'w', 'w', '.', 'd', '.', 'f', 'D', '.', 'w', 'w', '.', '.', '.'],
+        ['w', 'w', 'P', 'w', 'w', '.', 'd', 's', 'w', 'd', 'r', 'd', '.', 'w', '.', '.', 'w', 'w', 'w', 'd'],
+        ['a', 'w', '.', '.', 'w', '.', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', '.', 'f', 'D', 'w', 'r'],
         ['w', 'w', 'f', 'D', 'w', 'd', '.', '.', 'w', 'h', 'w', '.', '.', '.', '.', '.', 'd', 'w', 'w', 'w'],
-        ['w', '.', 'd', '.', 'w', 'w', 'r', 'd', '.', 'C', '.', 'd', 'w', '.', 'w', 'w', 'w', 'w', 'o', 'w'],
-        ['w', 'd', 'r', 'd', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'd', 'f', 'D', 'r', 'w', '.', 'd']
+        ['w', '.', 'd', 'w', 'w', 'w', 'r', 'd', '.', 'C', '.', 'd', 'w', '.', 'w', 'w', 'w', 'w', 'o', 'w'],
+        ['w', 'd', 'r', 'd', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'd', 'f', 'D', 'r', 'w', 'c', 'd']
     ]
 ]
 let level = structuredClone(levels[0])
@@ -76,6 +76,8 @@ let redDiamondCount = 0;
 let jumpWall = false;
 let swordActive = false;
 let peach = false;
+let ghost = false;
+let hungry = true;
 
 jumpEl.addEventListener('click', () => {
     jumpWall = !jumpWall;
@@ -249,6 +251,17 @@ function handleThing(thing, x, y) {
     const tile = document.querySelector(`.${thing}[style*="left: ${x * 25}px; top: ${y * 25}px"]`);
 
     if (thing === 'o' && diamondCount >= 50 && redDiamondCount >= 10) {
+        if (hungry) {
+            gameStatus.textContent = 'Someone is hungry! 🍑';
+            gameStatusContainer.style.display = 'flex';
+
+            setTimeout(() => {
+                gameStatusContainer.style.display = 'none';
+                game.classList.remove('blur');
+            }, 2700);
+            return;
+        }
+
         gameStatus.textContent = 'You win.';
         gameStatusContainer.style.display = 'flex';
         game.classList.add('blur');
@@ -355,7 +368,7 @@ function handleThing(thing, x, y) {
         }
         clearTimeout(moveTimeout);
 
-        const msg = thing === 'f' ? 'Dino 🦖 burned you! 🔥' : 'You were eaten by Dino! 🦖';
+        const msg = thing === 'f' ? 'You were burned 🔥 by Dino 🦖' : 'You were eaten 😋 by Dino! 🦖';
         document.querySelector('.move-btns').style.pointerEvents = 'none';
         gameStatus.textContent = msg;
 
@@ -389,22 +402,58 @@ function handleThing(thing, x, y) {
             }, 1000);
             level[y][x] = '.';
             heartEl.textContent = '💔';
+            ghost = true;
             return;
         }
 
         if (peach) {
             heartEl.textContent = '😋';
+            peachEl.style.opacity = '0.5';
+            hungry = false;
+            redDiamondCount += 3;
+            redDiamondCountEl.textContent = `💎${++redDiamondCount}/10`;
+            gameStatus.textContent = 'Cino gave you: +3 Red Diamonds! ';
+            setTimeout(() => {
+                gameStatusContainer.style.display = 'flex';
+                game.classList.add('won-blur');
+            }, 800);
+            setTimeout(() => {
+                gameStatusContainer.style.display = 'none';
+                game.classList.remove('blur');
+                tile.style.display = 'none';
+            }, 2700);
             return;
         }
 
-        gameStatus.textContent = 'Cino 🦕: I like peaches! 🍑';
+        gameStatus.textContent = 'Cino🦕: I like peach 🍑';
         setTimeout(() => {
             gameStatusContainer.style.display = 'flex';
         }, 300);
         setTimeout(() => {
             gameStatusContainer.style.display = 'none';
         }, 2500);
-        peach = true;
+    } else if (thing === 'c') {
+        if (ghost) {
+            tile.textContent = '🦕';
+            clearTimeout(moveTimeout);
+            moveBtns.forEach(btn => {
+                btn.style.pointerEvents = 'none';
+            });
+
+            const p = document.createElement('div');
+            p.textContent = '💀';
+            p.classList.add('dead');
+
+            setTimeout(() => {
+                player.textContent = '';
+                player.append(p);
+            }, 200);
+            setTimeout(() => {
+                gameStatus.textContent = 'You were killed by ghost Cino 🦕';
+                gameStatusContainer.style.display = 'flex';
+                game.classList.add('blur');
+            }, 1000);
+        }
     }
 }
 
