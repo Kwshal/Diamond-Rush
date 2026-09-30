@@ -457,7 +457,11 @@ function handleThing(thing, x, y) {
     }
 }
 
-startGameBtn.addEventListener('click', startGame);
+startGameBtn.addEventListener('click', refreshPage);
+// restart the page funtion
+function refreshPage () {
+    window.location.reload();
+}
 
 function startGame() {
     diamondCount = 0
